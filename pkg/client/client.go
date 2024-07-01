@@ -3,23 +3,15 @@ package client
 import (
 	"bufio"
 	"fmt"
+	"github.com/needl3/redis-cli-lite/pkg/searilizer"
 	"io"
 	"net"
 	"os"
-	"strings"
 )
 
 type Client struct {
-	conn net.Conn
-}
-
-func (cli Client) searilizeIn(cmd string) []byte {
-	searilized := fmt.Sprintf("*1\r\n$4\r\n%s\r\n", cmd)
-	return []byte(searilized)
-}
-
-func (cli Client) parseResponse(res []byte) string {
-	return strings.Trim(string(res), "+")
+	conn       net.Conn
+	serializer *serializer.Searializer
 }
 
 func (cli Client) HandleConnection() {
@@ -39,7 +31,7 @@ func (cli Client) HandleConnection() {
 			continue
 		}
 
-		_, err = cli.conn.Write(cli.searilizeIn(cmd))
+		_, err = cli.conn.Write(cli.serializer.Encoder.Encode(cmd))
 		if err != nil {
 			fmt.Println("Error sending data to server: ", err.Error())
 			continue
@@ -51,7 +43,7 @@ func (cli Client) HandleConnection() {
 			fmt.Println("Error reading server response")
 			fmt.Println(err.Error())
 		}
-		parsedResponse := cli.parseResponse(rawResponse)
+		parsedResponse := cli.serializer.Parser.Parse(rawResponse)
 
 		fmt.Printf(parsedResponse)
 	}
@@ -66,6 +58,7 @@ func New(host string, port string) Client {
 	}
 
 	return Client{
-		conn: conn,
+		conn:       conn,
+		serializer: serializer.New(),
 	}
 }

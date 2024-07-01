@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/needl3/redis-cli-lite/client"
+	"github.com/needl3/redis-cli-lite/pkg/client"
 	"github.com/spf13/cobra"
 )
 
