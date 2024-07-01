@@ -3,15 +3,19 @@ package client
 import (
 	"bufio"
 	"fmt"
-	"github.com/needl3/redis-cli-lite/pkg/searilizer"
 	"io"
 	"net"
 	"os"
+	"strings"
+
+	"github.com/needl3/redis-cli-lite/pkg/searilizer"
 )
 
 type Client struct {
 	conn       net.Conn
 	serializer *serializer.Searializer
+	host       string
+	port       string
 }
 
 func (cli Client) HandleConnection() {
@@ -19,7 +23,7 @@ func (cli Client) HandleConnection() {
 
 	reader := bufio.NewReader(os.Stdin)
 	for {
-		fmt.Printf("127.0.0.1:6379>")
+		fmt.Printf("%s:%s>", cli.host, cli.port)
 		cmd, err := reader.ReadString('\n')
 		if err != nil {
 			if err == io.EOF {
@@ -31,7 +35,8 @@ func (cli Client) HandleConnection() {
 			continue
 		}
 
-		_, err = cli.conn.Write(cli.serializer.Encoder.Encode(cmd))
+		encoded := cli.serializer.Encoder.Encode(strings.Trim(cmd, "\n"))
+		_, err = cli.conn.Write(encoded)
 		if err != nil {
 			fmt.Println("Error sending data to server: ", err.Error())
 			continue
@@ -60,5 +65,7 @@ func New(host string, port string) Client {
 	return Client{
 		conn:       conn,
 		serializer: serializer.New(),
+		host:       host,
+		port:       port,
 	}
 }

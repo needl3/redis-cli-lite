@@ -13,7 +13,7 @@ var rootCmd = &cobra.Command{
 	Short: "Redis cli lite a simple command line redis client",
 	Long:  "This was developed an exercise driven project to learn Golang and it's intricacies.",
 	Run: func(cmd *cobra.Command, args []string) {
-		host := "localhost"
+		host := "127.0.0.1"
 		port := "6379"
 		if len(args) == 2 {
 			host = args[0]
