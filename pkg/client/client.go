@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/needl3/redis-cli-lite/pkg/searilizer"
+	"github.com/needl3/redis-cli-lite/pkg/serializer"
 )
 
 type Client struct {
@@ -27,37 +27,42 @@ func (cli Client) HandleConnection() {
 		cmd, err := reader.ReadString('\n')
 		if err != nil {
 			if err == io.EOF {
-				fmt.Println("\nBye Bye")
+				fmt.Println("\n[-] Bye Bye")
 				return
 			}
 
-			fmt.Println("\nError reading input")
+			fmt.Println("\n[X] Error reading input")
 			continue
 		}
 
 		encoded := cli.serializer.Encoder.Encode(strings.Trim(cmd, "\n"))
 		_, err = cli.conn.Write(encoded)
 		if err != nil {
-			fmt.Println("Error sending data to server: ", err.Error())
+			fmt.Println("[X] Error sending data to server: ", err.Error())
 			continue
 		}
 
 		rawResponse := make([]byte, 1024)
 		_, err = cli.conn.Read(rawResponse)
 		if err != nil {
-			fmt.Println("Error reading server response")
+			fmt.Println("[X] Error reading server response")
 			fmt.Println(err.Error())
 		}
-		parsedResponse := cli.serializer.Parser.Parse(rawResponse)
+		parsedResponse, _, err := cli.serializer.Parser.Parse(rawResponse)
+		if err != nil {
+			fmt.Println("[X] Invalid response. Failed to parse")
+			fmt.Println(err.Error())
+			return
+		}
 
-		fmt.Printf(parsedResponse)
+		fmt.Println(parsedResponse.Value)
 	}
 }
 
 func New(host string, port string) Client {
 	conn, err := net.Dial("tcp", fmt.Sprintf("%s:%s", host, port))
 	if err != nil {
-		fmt.Println("Couldn't connect to redis server")
+		fmt.Println("[X] Couldn't connect to redis server")
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}

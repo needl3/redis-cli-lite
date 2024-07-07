@@ -3,29 +3,53 @@
 
 package serializer
 
-import "strings"
+import (
+	"errors"
+)
 
 type Parser struct {
-	OK_TYPE      string
-	ERROR_TYPE   string
-	CLRF         string
-	I_ARR        string
-	I_BULKSTRING string
+	SimpleStringIdentifier byte
+	SimpleErrorIdentifier  byte
+	IntegersIdentifier     byte
+	BulkStringIdentifier   byte
+	ArrayIdentifier        byte
 }
 
 var ParserClient Parser
 
 func init() {
 	ParserClient = Parser{
-		OK_TYPE:      "+",
-		ERROR_TYPE:   "-",
-		CLRF:         "\r\n",
-		I_ARR:        "*",
-		I_BULKSTRING: "$",
+		SimpleStringIdentifier: '+',
+		SimpleErrorIdentifier:  '-',
+		IntegersIdentifier:     ':',
+		BulkStringIdentifier:   '$',
+		ArrayIdentifier:        '*',
 	}
 }
 
-func (prsr Parser) Parse(resp []byte) string {
-	// Time for some state machine
-	return strings.Trim(string(resp), "+")
+func (prsr Parser) Parse(expr []byte) (Token[any], []byte, error) {
+	if len(expr) < 3 {
+		return Token[any]{}, nil, errors.New("Invalid expression to parse")
+	}
+
+	identifier := expr[0]
+	if identifier == prsr.SimpleStringIdentifier || identifier == prsr.SimpleErrorIdentifier {
+		tokenizer := NewSimpleStringTokenizer()
+		token, expr := tokenizer.Parse(expr[1:])
+		return Token[any]{Value: token.Value, TokenType: token.TokenType}, expr, nil
+	} else if identifier == prsr.BulkStringIdentifier {
+		tokenizer := NewBulkStringTokenizer()
+		token, expr := tokenizer.Parse(expr[1:])
+		return Token[any]{Value: token.Value, TokenType: token.TokenType}, expr, nil
+	} else if identifier == prsr.IntegersIdentifier {
+		tokenizer := NewIntegersTokenizer()
+		token, expr := tokenizer.Parse(expr[1:])
+		return Token[any]{Value: token.Value, TokenType: token.TokenType}, expr, nil
+	} else if identifier == prsr.ArrayIdentifier {
+		tokenizer := NewArrayTokenizer()
+		token, expr := tokenizer.Parse(expr[1:])
+		return Token[any]{Value: token.Value, TokenType: token.TokenType}, expr, nil
+	}
+
+	return Token[any]{}, nil, errors.ErrUnsupported
 }
