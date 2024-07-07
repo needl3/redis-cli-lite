@@ -66,8 +66,6 @@ func ExtractLength(expr []byte) (int, []byte) {
 	return 0, expr
 }
 
-// TODO: Change string type value to []byte
-
 func NewSimpleStringTokenizer() Tokenizer[string] {
 	return Tokenizer[string]{
 		Identifier: '+',
@@ -92,8 +90,7 @@ func NewBulkStringTokenizer() Tokenizer[string] {
 				TokenType: "bulkstring",
 				Value:     "",
 			}
-
-			// TODO: Use _ instead of ignoring
+	
 			_, expr = ExtractLength(expr)
 			expr = scanToken(expr, func(b byte) {
 				token.Value += string(b)
@@ -104,7 +101,6 @@ func NewBulkStringTokenizer() Tokenizer[string] {
 }
 
 func NewIntegersTokenizer() Tokenizer[string] {
-	// TODO: Use native integer instead of string
 	return Tokenizer[string]{
 		Identifier: ':',
 		Parse: func(expr []byte) (Token[string], []byte) {
