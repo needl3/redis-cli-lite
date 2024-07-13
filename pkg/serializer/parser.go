@@ -5,77 +5,37 @@ package serializer
 
 import (
 	"errors"
+
+	"github.com/needl3/redis-cli-lite/pkg/constants/identifier"
 )
 
-type Parser struct {
-	SimpleStringIdentifier byte
-	SimpleErrorIdentifier  byte
-	IntegersIdentifier     byte
-	BulkStringIdentifier   byte
-	ArrayIdentifier        byte
-}
-
-var ParserClient Parser
-
-func init() {
-	ParserClient = Parser{
-		SimpleStringIdentifier: '+',
-		SimpleErrorIdentifier:  '-',
-		IntegersIdentifier:     ':',
-		BulkStringIdentifier:   '$',
-		ArrayIdentifier:        '*',
-	}
-}
-
-func (prsr Parser) Parse(expr []byte) (Token[any], []byte, error) {
+func Parse(expr []byte) (Token[any], []byte, error) {
 	if len(expr) < 3 {
 		return Token[any]{}, nil, errors.New("Invalid expression to parse")
 	}
 
-	identifier := expr[0]
-	if identifier == prsr.SimpleStringIdentifier || identifier == prsr.SimpleErrorIdentifier {
+	_identifier := expr[0]
+	if _identifier == identifier.SIMPLE_STRING {
 		tokenizer := NewSimpleStringTokenizer()
 		token, expr := tokenizer.Parse(expr[1:])
 		return Token[any]{Value: token.Value, TokenType: token.TokenType}, expr, nil
-	} else if identifier == prsr.BulkStringIdentifier {
+	} else if _identifier == identifier.SIMPLE_ERROR {
+		tokenizer := NewSimpleErrorTokenizer()
+		token, expr := tokenizer.Parse(expr[1:])
+		return Token[any]{Value: token.Value, TokenType: token.TokenType}, expr, nil
+	} else if _identifier == identifier.BULK_STRING {
 		tokenizer := NewBulkStringTokenizer()
 		token, expr := tokenizer.Parse(expr[1:])
 		return Token[any]{Value: token.Value, TokenType: token.TokenType}, expr, nil
-	} else if identifier == prsr.IntegersIdentifier {
+	} else if _identifier == identifier.INTEGER {
 		tokenizer := NewIntegersTokenizer()
 		token, expr := tokenizer.Parse(expr[1:])
 		return Token[any]{Value: token.Value, TokenType: token.TokenType}, expr, nil
-	} else if identifier == prsr.ArrayIdentifier {
+	} else if _identifier == identifier.ARRAY {
 		tokenizer := NewArrayTokenizer()
 		token, expr := tokenizer.Parse(expr[1:])
 		return Token[any]{Value: token.Value, TokenType: token.TokenType}, expr, nil
 	}
 
 	return Token[any]{}, nil, errors.ErrUnsupported
-}
-
-func (prsr Parser) Pretty(token Token[any]) string {
-	switch token.TokenType {
-	case identifier.SIMPLE_STRING:
-		return token.Value.(string)
-	case identifier.SIMPLE_ERROR:
-		return token.Value.(string)
-	case identifier.INTEGER:
-		return string(token.Value.(int))
-	case identifier.ARRAY:
-		finalString := "["
-		arr, ok := token.Value.([]Token[any])
-		if !ok {
-			return "[]"
-		}
-		for idx, val := range arr {
-			finalString += prsr.Pretty(val)
-			if idx < len(arr)-1 {
-				finalString += ", "
-			}
-		}
-		return finalString + "]"
-	default:
-		return ""
-	}
 }

@@ -1,7 +1,6 @@
 package serializer
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 )

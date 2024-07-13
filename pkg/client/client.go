@@ -1,4 +1,4 @@
-package client
+package cli
 
 import (
 	"bufio"
@@ -12,10 +12,12 @@ import (
 )
 
 type Client struct {
-	conn       net.Conn
-	serializer *serializer.Searializer
-	host       string
-	port       string
+	conn    net.Conn
+	encoder serializer.Encoder
+	parser  func(expr []byte) (serializer.Token[any], []byte, error)
+	printer func(token serializer.Token[any]) string
+	host    string
+	port    string
 }
 
 func (cli Client) HandleConnection() {
@@ -35,7 +37,7 @@ func (cli Client) HandleConnection() {
 			continue
 		}
 
-		encoded := cli.serializer.Encoder.Encode(strings.Trim(cmd, "\n"))
+		encoded := cli.encoder.Encode(strings.Trim(cmd, "\n"))
 		_, err = cli.conn.Write(encoded)
 		if err != nil {
 			fmt.Println("[X] Error sending data to server: ", err.Error())
@@ -48,14 +50,14 @@ func (cli Client) HandleConnection() {
 			fmt.Println("[X] Error reading server response")
 			fmt.Println(err.Error())
 		}
-		parsedResponse, _, err := cli.serializer.Parser.Parse(rawResponse)
+		parsedResponse, _, err := cli.parser(rawResponse)
 		if err != nil {
 			fmt.Println("[X] Invalid response. Failed to parse")
 			fmt.Println(err.Error())
 			return
 		}
 
-		fmt.Println(parsedResponse.Value)
+		fmt.Println(cli.printer(parsedResponse))
 	}
 }
 
@@ -68,9 +70,11 @@ func New(host string, port string) Client {
 	}
 
 	return Client{
-		conn:       conn,
-		serializer: serializer.New(),
-		host:       host,
-		port:       port,
+		conn:    conn,
+		host:    host,
+		port:    port,
+		encoder: serializer.EncoderClient,
+		parser:  serializer.Parse,
+		printer: serializer.Pretty,
 	}
 }

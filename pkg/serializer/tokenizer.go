@@ -3,10 +3,12 @@ package serializer
 import (
 	"fmt"
 	"strconv"
+
+	"github.com/needl3/redis-cli-lite/pkg/constants/identifier"
 )
 
 type Token[T any] struct {
-	TokenType string
+	TokenType byte
 	Value     T
 }
 
@@ -68,10 +70,26 @@ func ExtractLength(expr []byte) (int, []byte) {
 
 func NewSimpleStringTokenizer() Tokenizer[string] {
 	return Tokenizer[string]{
-		Identifier: '+',
+		Identifier: identifier.SIMPLE_STRING,
 		Parse: func(expr []byte) (Token[string], []byte) {
 			token := Token[string]{
-				TokenType: "simplestring",
+				TokenType: identifier.SIMPLE_STRING,
+				Value:     "",
+			}
+			expr = scanToken(expr, func(b byte) {
+				token.Value += string(b)
+			})
+			return token, expr
+		},
+	}
+}
+
+func NewSimpleErrorTokenizer() Tokenizer[string] {
+	return Tokenizer[string]{
+		Identifier: identifier.SIMPLE_ERROR,
+		Parse: func(expr []byte) (Token[string], []byte) {
+			token := Token[string]{
+				TokenType: identifier.SIMPLE_STRING,
 				Value:     "",
 			}
 			expr = scanToken(expr, func(b byte) {
@@ -84,13 +102,13 @@ func NewSimpleStringTokenizer() Tokenizer[string] {
 
 func NewBulkStringTokenizer() Tokenizer[string] {
 	return Tokenizer[string]{
-		Identifier: '$',
+		Identifier: identifier.BULK_STRING,
 		Parse: func(expr []byte) (Token[string], []byte) {
 			token := Token[string]{
-				TokenType: "bulkstring",
+				TokenType: identifier.BULK_STRING,
 				Value:     "",
 			}
-	
+
 			_, expr = ExtractLength(expr)
 			expr = scanToken(expr, func(b byte) {
 				token.Value += string(b)
@@ -102,7 +120,7 @@ func NewBulkStringTokenizer() Tokenizer[string] {
 
 func NewIntegersTokenizer() Tokenizer[string] {
 	return Tokenizer[string]{
-		Identifier: ':',
+		Identifier: identifier.INTEGER,
 		Parse: func(expr []byte) (Token[string], []byte) {
 			sign := ""
 			if expr[0] == '-' {
@@ -110,7 +128,7 @@ func NewIntegersTokenizer() Tokenizer[string] {
 				sign = "-"
 			}
 			token := Token[string]{
-				TokenType: "integer",
+				TokenType: identifier.INTEGER,
 				Value:     sign,
 			}
 
@@ -125,16 +143,16 @@ func NewIntegersTokenizer() Tokenizer[string] {
 
 func NewArrayTokenizer() Tokenizer[[]Token[any]] {
 	return Tokenizer[[]Token[any]]{
-		Identifier: '*',
+		Identifier: identifier.ARRAY,
 		Parse: func(expr []byte) (Token[[]Token[any]], []byte) {
-			token := Token[[]Token[any]]{TokenType: "array", Value: nil}
+			token := Token[[]Token[any]]{TokenType: identifier.ARRAY, Value: nil}
 			arrLength, expr := ExtractLength(expr)
 			token.Value = make([]Token[any], arrLength)
 
 			var err error
 			var tk Token[any]
 			for i := 0; i < arrLength; i++ {
-				tk, expr, err = ParserClient.Parse(expr)
+				tk, expr, err = Parse(expr)
 				if err != nil {
 					fmt.Println(err)
 					continue
