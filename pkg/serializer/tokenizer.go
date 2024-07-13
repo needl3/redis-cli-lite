@@ -17,7 +17,9 @@ type Tokenizer[T any] struct {
 	Parse      func(expr []byte) (Token[T], []byte)
 }
 
-func scanToken(expr []byte, function func(byte)) []byte {
+type TokenizerOutput []byte
+
+func scanToken(expr []byte, function func(byte, int)) []byte {
 	var delimeter []byte
 	for idx, val := range expr {
 		if val == '\r' {
@@ -36,7 +38,7 @@ func scanToken(expr []byte, function func(byte)) []byte {
 			}
 		} else {
 			delimeter = nil
-			function(val)
+			function(val, idx)
 		}
 	}
 	return expr
@@ -68,73 +70,76 @@ func ExtractLength(expr []byte) (int, []byte) {
 	return 0, expr
 }
 
-func NewSimpleStringTokenizer() Tokenizer[string] {
-	return Tokenizer[string]{
+func NewSimpleStringTokenizer() Tokenizer[TokenizerOutput] {
+	return Tokenizer[TokenizerOutput]{
 		Identifier: identifier.SIMPLE_STRING,
-		Parse: func(expr []byte) (Token[string], []byte) {
-			token := Token[string]{
+		Parse: func(expr []byte) (Token[TokenizerOutput], []byte) {
+			token := Token[TokenizerOutput]{
 				TokenType: identifier.SIMPLE_STRING,
-				Value:     "",
+				Value:     []byte{},
 			}
-			expr = scanToken(expr, func(b byte) {
-				token.Value += string(b)
+			expr = scanToken(expr, func(b byte, _ int) {
+				token.Value = append(token.Value, b)
 			})
 			return token, expr
 		},
 	}
 }
 
-func NewSimpleErrorTokenizer() Tokenizer[string] {
-	return Tokenizer[string]{
+func NewSimpleErrorTokenizer() Tokenizer[TokenizerOutput] {
+	return Tokenizer[TokenizerOutput]{
 		Identifier: identifier.SIMPLE_ERROR,
-		Parse: func(expr []byte) (Token[string], []byte) {
-			token := Token[string]{
-				TokenType: identifier.SIMPLE_STRING,
-				Value:     "",
+		Parse: func(expr []byte) (Token[TokenizerOutput], []byte) {
+			token := Token[TokenizerOutput]{
+				TokenType: identifier.SIMPLE_ERROR,
+				Value:     []byte{},
 			}
-			expr = scanToken(expr, func(b byte) {
-				token.Value += string(b)
+			expr = scanToken(expr, func(b byte, _idx int) {
+				token.Value = append(token.Value, b)
 			})
 			return token, expr
 		},
 	}
 }
 
-func NewBulkStringTokenizer() Tokenizer[string] {
-	return Tokenizer[string]{
+func NewBulkStringTokenizer() Tokenizer[TokenizerOutput] {
+	return Tokenizer[TokenizerOutput]{
 		Identifier: identifier.BULK_STRING,
-		Parse: func(expr []byte) (Token[string], []byte) {
-			token := Token[string]{
+		Parse: func(expr []byte) (Token[TokenizerOutput], []byte) {
+			token := Token[TokenizerOutput]{
 				TokenType: identifier.BULK_STRING,
-				Value:     "",
+				Value:     nil,
 			}
 
-			_, expr = ExtractLength(expr)
-			expr = scanToken(expr, func(b byte) {
-				token.Value += string(b)
+			size, expr := ExtractLength(expr)
+			token.Value = make([]byte, size)
+
+			expr = scanToken(expr, func(b byte, idx int) {
+				token.Value[idx] = b
 			})
 			return token, expr
 		},
 	}
 }
 
-func NewIntegersTokenizer() Tokenizer[string] {
-	return Tokenizer[string]{
+func NewIntegersTokenizer() Tokenizer[int] {
+	return Tokenizer[int]{
 		Identifier: identifier.INTEGER,
-		Parse: func(expr []byte) (Token[string], []byte) {
-			sign := ""
+		Parse: func(expr []byte) (Token[int], []byte) {
+			sign := 1
 			if expr[0] == '-' {
 				expr = expr[1:]
-				sign = "-"
+				sign = -1
 			}
-			token := Token[string]{
+			token := Token[int]{
 				TokenType: identifier.INTEGER,
-				Value:     sign,
+				Value:     0,
 			}
 
-			expr = scanToken(expr, func(b byte) {
-				token.Value += string(b)
+			expr = scanToken(expr, func(b byte, _ int) {
+				token.Value = token.Value*10 + int(b-'0')
 			})
+			token.Value *= sign
 
 			return token, expr
 		},
