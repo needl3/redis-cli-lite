@@ -53,3 +53,29 @@ func (prsr Parser) Parse(expr []byte) (Token[any], []byte, error) {
 
 	return Token[any]{}, nil, errors.ErrUnsupported
 }
+
+func (prsr Parser) Pretty(token Token[any]) string {
+	switch token.TokenType {
+	case identifier.SIMPLE_STRING:
+		return token.Value.(string)
+	case identifier.SIMPLE_ERROR:
+		return token.Value.(string)
+	case identifier.INTEGER:
+		return string(token.Value.(int))
+	case identifier.ARRAY:
+		finalString := "["
+		arr, ok := token.Value.([]Token[any])
+		if !ok {
+			return "[]"
+		}
+		for idx, val := range arr {
+			finalString += prsr.Pretty(val)
+			if idx < len(arr)-1 {
+				finalString += ", "
+			}
+		}
+		return finalString + "]"
+	default:
+		return ""
+	}
+}

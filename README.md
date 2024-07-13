@@ -7,9 +7,9 @@ You can use this on cli but that has limitations. For example, there is not real
 
 
 ## TODOS
-[] Implement pretty printer 
-[] Change string type value to []byte - tokenizer.go:70
-[] TODO: Use _ instead of ignoring - tokenizer.go:95
-[] Use native integer instead of string - tokenizer.go:104
-[] Expand as golang library
-[] Support for more datatypes
+- [ ] Implement pretty printer 
+- [ ] Change string type value to []byte - tokenizer.go:70
+- [ ] TODO: Use _ instead of ignoring - tokenizer.go:95
+- [ ] Use native integer instead of string - tokenizer.go:104
+- [ ] Expand as golang library
+- [ ] Support for more datatypes
