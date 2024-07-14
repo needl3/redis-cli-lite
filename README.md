@@ -13,5 +13,6 @@ You can use this on cli but that has limitations. For example, there is not real
 - [x] Change string type value to []byte
 - [x] TODO: Use \_ instead of ignoring
 - [x] Use native integer instead of string
-- [ ] Expand as golang library
-- [ ] Support for more datatypes
+- [x] Expand as golang library
+- [ ] Support for connection pooling
+- [ ] Support for secure tcp
