@@ -1,5 +1,11 @@
 package api
 
+//
+// Api is used to interact with redis server
+// TODO apis
+// ping, set, get, del, lpush, lpop, rpush, rpop, lrange, ltrim, lindex, lset, lrem
+//
+
 import (
 	"net"
 

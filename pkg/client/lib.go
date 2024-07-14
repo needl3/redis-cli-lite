@@ -62,7 +62,6 @@ func (lib *Library) releaseConnection(conn net.Conn) {
 
 func (lib *Library) SendRaw(message []byte) ([]byte, error) {
 	conn, err := lib.getConnection()
-	fmt.Println("Conn: ", conn)
 	if err != nil {
 		return nil, err
 	}
