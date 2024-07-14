@@ -112,6 +112,9 @@ func NewBulkStringTokenizer() Tokenizer[TokenizerOutput] {
 			}
 
 			size, expr := ExtractLength(expr)
+			if size < 0 {
+				return token, expr
+			}
 			token.Value = make([]byte, size)
 
 			expr = scanToken(expr, func(b byte, idx int) {
