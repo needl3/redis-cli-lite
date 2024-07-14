@@ -6,4 +6,5 @@ const (
 	BULK_STRING   = '$'
 	INTEGER       = ':'
 	ARRAY         = '*'
+	NULL          = '_'
 )
