@@ -26,5 +26,10 @@ func (api Api) set(key string, val string) error {
 		}
 		return errors.New("Invalid set response")
 	}
+
+	if token.TokenType == identifier.SIMPLE_ERROR {
+		return errors.New(string(token.Value.(serializer.TokenizerOutput)))
+	}
+
 	return errors.New("Invalid set response")
 }
