@@ -19,7 +19,7 @@ var rootCmd = &cobra.Command{
 			host = args[0]
 			port = args[1]
 		}
-		redisClient := cli.New(host, port)
+		redisClient := client.New(host, port)
 		redisClient.HandleConnection()
 	},
 }
