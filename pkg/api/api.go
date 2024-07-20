@@ -23,7 +23,7 @@ func Initialize(host string, port int, pool int) (*Api, error) {
 	lib := &client.Library{
 		Host:     host,
 		Port:     port,
-		ConnPool: []net.Conn{},
+		ConnPool: make(chan net.Conn, pool),
 	}
 	var err error
 	if pool > 1 {

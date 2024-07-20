@@ -14,5 +14,5 @@ You can use this on cli but that has limitations. For example, there is not real
 - [x] TODO: Use \_ instead of ignoring
 - [x] Use native integer instead of string
 - [x] Expand as golang library
-- [ ] Support for connection pooling
+- [x] Support for blocking send due to connection pooling
 - [ ] Support for secure tcp

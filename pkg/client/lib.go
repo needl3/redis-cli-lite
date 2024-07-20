@@ -1,15 +1,17 @@
 package client
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net"
+	"time"
 )
 
 type Library struct {
 	Host     string
 	Port     int
-	ConnPool []net.Conn
+	ConnPool chan net.Conn
 }
 
 func (lib *Library) addr() string {
@@ -28,7 +30,7 @@ func (lib *Library) ConnectPool(pool int) error {
 		for ; maxRetries > 0; maxRetries-- {
 			conn, _err := net.Dial("tcp", lib.addr())
 			if _err == nil {
-				lib.ConnPool = append(lib.ConnPool, conn)
+				lib.ConnPool <- conn
 				break
 			}
 			fmt.Println("[X] Couldn't connect to redis server")
@@ -36,39 +38,33 @@ func (lib *Library) ConnectPool(pool int) error {
 
 		}
 		if maxRetries == 0 {
-			fmt.Println("Couldn't connect to server. Closing all connections")
-			for _, c := range lib.ConnPool {
-				c.Close()
+			err = errors.New("Couldn't connect to server. Closing all connections")
+			for {
+				select {
+				case conn := <-lib.ConnPool:
+					conn.Close()
+				default:
+					return err
+				}
 			}
-			return err
 		}
 	}
 	return nil
 }
 
-func (lib *Library) getConnection() (net.Conn, error) {
-	if len(lib.ConnPool) == 0 {
-		return nil, errors.New("No connection available")
-	}
-
-	conn := lib.ConnPool[0]
-	lib.ConnPool = lib.ConnPool[1:]
-	return conn, nil
-}
-
 func (lib *Library) releaseConnection(conn net.Conn) {
-	lib.ConnPool = append(lib.ConnPool, conn)
+	lib.ConnPool <- conn
 }
 
 func (lib *Library) SendRaw(message []byte) ([]byte, error) {
-	conn, err := lib.getConnection()
-	if err != nil {
-		return nil, err
+	conn, ok := <-lib.ConnPool
+	if !ok {
+		return nil, errors.New("No connections available. Pool closed.")
 	}
 
 	defer lib.releaseConnection(conn)
 
-	_, err = conn.Write(message)
+	_, err := conn.Write(message)
 	if err != nil {
 		return nil, err
 	}
@@ -79,4 +75,24 @@ func (lib *Library) SendRaw(message []byte) ([]byte, error) {
 		return nil, err
 	}
 	return rawResponse, nil
+}
+
+// Currently being used on testing
+func (lib *Library) Monitor(ctx context.Context) <-chan string {
+	logChan := make(chan string)
+	go func() {
+		for {
+			logChan <- fmt.Sprintf("Connections: %d", len(lib.ConnPool))
+
+			select {
+			case <-ctx.Done():
+				logChan <- fmt.Sprintln("[!] Exiting monitor")
+				return
+			default:
+				time.Sleep(50 * time.Millisecond)
+				continue
+			}
+		}
+	}()
+	return logChan
 }
