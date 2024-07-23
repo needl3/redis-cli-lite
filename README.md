@@ -15,4 +15,4 @@ You can use this on cli but that has limitations. For example, there is not real
 - [x] Use native integer instead of string
 - [x] Expand as golang library
 - [x] Support for blocking send due to connection pooling
-- [ ] Support for secure tcp
+- [x] Support for secure tcp

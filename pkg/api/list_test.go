@@ -3,10 +3,17 @@ package api
 import (
 	"log"
 	"testing"
+
+	"github.com/needl3/redis-cli-lite/pkg/utils"
 )
 
 func TestLPush(t *testing.T) {
-	api, err := Initialize("localhost", 6379, 1)
+	tlsConfig, err := utils.PrepareTLSConfig("../../redis.crt", "../../redis.key")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	api, err := Initialize("localhost", 6379, 1, tlsConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -20,7 +27,12 @@ func TestLPush(t *testing.T) {
 }
 
 func TestLPop(t *testing.T) {
-	api, err := Initialize("localhost", 6379, 1)
+	tlsConfig, err := utils.PrepareTLSConfig("../../redis.crt", "../../redis.key")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	api, err := Initialize("localhost", 6379, 1, tlsConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -43,7 +55,12 @@ func TestLPop(t *testing.T) {
 }
 
 func TestLRange(t *testing.T) {
-	api, err := Initialize("localhost", 6379, 1)
+	tlsConfig, err := utils.PrepareTLSConfig("../../redis.crt", "../../redis.key")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	api, err := Initialize("localhost", 6379, 1, tlsConfig)
 	if err != nil {
 		log.Fatal(err)
 	}

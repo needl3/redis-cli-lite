@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net"
@@ -18,24 +19,27 @@ func (lib *Library) addr() string {
 	return fmt.Sprintf("%s:%d", lib.Host, lib.Port)
 }
 
-func (lib *Library) Connect() error {
-	return lib.ConnectPool(1)
+func (lib *Library) connect(secure *tls.Config) (net.Conn, error) {
+	if secure == nil {
+		return net.Dial("tcp", lib.addr())
+	}
+
+	return tls.Dial("tcp", lib.addr(), secure)
+
 }
 
-func (lib *Library) ConnectPool(pool int) error {
+func (lib *Library) ConnectPool(pool int, secure *tls.Config) error {
 	for i := 0; i < pool; i++ {
 		maxRetries := 3
 
 		var err error
 		for ; maxRetries > 0; maxRetries-- {
-			conn, _err := net.Dial("tcp", lib.addr())
-			if _err == nil {
+			var conn net.Conn
+			conn, err = lib.connect(secure)
+			if err == nil {
 				lib.ConnPool <- conn
 				break
 			}
-			fmt.Println("[X] Couldn't connect to redis server")
-			err = _err
-
 		}
 		if maxRetries == 0 {
 			err = errors.New("Couldn't connect to server. Closing all connections")

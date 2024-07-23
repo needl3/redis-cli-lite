@@ -18,8 +18,9 @@ func TestConnectionPoolPopulation(t *testing.T) {
 		Port:     6379,
 		ConnPool: make(chan net.Conn, connectionPool),
 	}
-	lib.ConnectPool(connectionPool)
-	if len(lib.ConnPool) != connectionPool {
+	err := lib.ConnectPool(connectionPool, nil)
+
+	if len(lib.ConnPool) != connectionPool || err != nil {
 		t.Fatalf("Connection pool not populated")
 	}
 }
@@ -33,7 +34,7 @@ func TestStressfulConnectionPool(t *testing.T) {
 		Port:     6379,
 		ConnPool: make(chan net.Conn, connectionPool),
 	}
-	lib.ConnectPool(connectionPool)
+	lib.ConnectPool(connectionPool, nil)
 
 	ctx, cancel := context.WithCancel(context.Background())
 
