@@ -1,5 +1,10 @@
 ## Redis client written in go
 
+### Modes of usage
+1. Use as cli tool
+2. Use it with your golang project
+
+
 [![Go](https://img.shields.io/badge/go-1.22.4-blue.svg)](https://golang.org/)
 
 You can use this on cli but that has limitations. For example, there is not really a way to tell if the value is string, number or array from cli. So, everything is stored as string. We could implement something intelligent like:
