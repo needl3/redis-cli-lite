@@ -1,4 +1,5 @@
 [![Go](https://img.shields.io/badge/go-1.22.4-blue.svg)](https://golang.org/)
+[![Go](https://img.shields.io/badge/version-1.0.0-purple.svg)](https://golang.org/)
 
 ## Redis client written in go
 
