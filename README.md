@@ -1,3 +1,5 @@
+[![Go](https://img.shields.io/badge/go-1.22.4-blue.svg)](https://golang.org/)
+
 ## Redis client written in go
 
 ### Modes of usage
@@ -5,12 +7,8 @@
 2. Use it with your golang project
 
 
-[![Go](https://img.shields.io/badge/go-1.22.4-blue.svg)](https://golang.org/)
 
-You can use this on cli but that has limitations. For example, there is not really a way to tell if the value is string, number or array from cli. So, everything is stored as string. We could implement something intelligent like:
-
-1. Parse if input is number or string
-2. Support for RESP from cli but this is unnecessarily complex and unusable and not even official cli tool does it afaik.
+You can use this on cli but that has limitations. For example, there is not really a way to tell if the value is string, number or array from cli. So, everything is stored as string. We could implement something intelligent but this is unnecessarily complex and unusable and not even official cli tool does it afaik.
 
 ## How to use secure tcp
 Note: This will only work with SAN certificate and not CN ones as official `redis-server` requires. So make sure to have a configuration file for openssl as per your organization.
