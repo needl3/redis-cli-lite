@@ -76,3 +76,4 @@ openssl req -x509 -nodes -new -key redis.key -sha256 -days 3650 -out redis.crt -
 - [x] Expand as golang library
 - [x] Support for blocking send due to connection pooling
 - [x] Support for secure tcp
+- [ ] Support for secure tcp on cli mode
