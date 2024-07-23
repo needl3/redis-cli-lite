@@ -18,7 +18,7 @@ func TestPing(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	resp, err := api.ping()
+	resp, err := api.Ping()
 	if err != nil {
 		t.Fatal(err)
 	}

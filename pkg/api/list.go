@@ -11,7 +11,7 @@ import (
 
 // LPUSH - Prepend one or multiple values to a list
 // Datatype - Integer as operation success status
-func (api Api) lpush(key string, value string) (int, error) {
+func (api Api) Lpush(key string, value string) (int, error) {
 
 	encoded := api.Encoder.Encode(commands.LPUSH + " " + key + " " + value)
 	response, err := api.Lib.SendRaw(encoded)
@@ -36,7 +36,7 @@ func (api Api) lpush(key string, value string) (int, error) {
 
 // LPOP - Removes and returns the first element of the list stored at key.
 // Datatype - Bulk string
-func (api Api) lpop(key string) (string, error) {
+func (api Api) Lpop(key string) (string, error) {
 	encoded := api.Encoder.Encode(commands.LPOP + " " + key)
 	response, err := api.Lib.SendRaw(encoded)
 	if err != nil {
@@ -58,7 +58,7 @@ func (api Api) lpop(key string) (string, error) {
 	return "", errors.New("Invalid response")
 }
 
-func (api Api) lrange(key string, start int, stop int) ([]any, error) {
+func (api Api) Lrange(key string, start int, stop int) ([]any, error) {
 	encoded := api.Encoder.Encode(commands.LRANGE + " " + key + " " + fmt.Sprint(start) + " " + fmt.Sprint(stop))
 	response, err := api.Lib.SendRaw(encoded)
 	if err != nil {

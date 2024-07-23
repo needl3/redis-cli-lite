@@ -8,7 +8,7 @@ import (
 	"github.com/needl3/redis-cli-lite/pkg/serializer"
 )
 
-func (api Api) get(data string) (string, error) {
+func (api Api) Get(data string) (string, error) {
 	encoded := api.Encoder.Encode(commands.GET + " " + data)
 	response, err := api.Lib.SendRaw(encoded)
 	if err != nil {

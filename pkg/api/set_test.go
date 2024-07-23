@@ -17,7 +17,7 @@ func TestSet(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = api.set("name", "uwu")
+	err = api.Set("name", "uwu")
 	if err != nil {
 		t.Fatal("Setting value failed: ", err)
 	}
@@ -36,12 +36,12 @@ func TestGet(t *testing.T) {
 
 	key := "name"
 	val := "uwu"
-	err = api.set(key, val)
+	err = api.Set(key, val)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	resp, err := api.get(key)
+	resp, err := api.Get(key)
 	if err != nil {
 		t.Fatal(err)
 	}

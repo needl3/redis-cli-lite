@@ -8,7 +8,7 @@ import (
 	"github.com/needl3/redis-cli-lite/pkg/serializer"
 )
 
-func (api Api) ping() (string, error) {
+func (api Api) Ping() (string, error) {
 	encoded := api.Encoder.Encode(commands.PING)
 	response, err := api.Lib.SendRaw(encoded)
 	if err != nil {

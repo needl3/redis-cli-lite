@@ -20,17 +20,17 @@ func TestDel(t *testing.T) {
 
 	key := "todelete"
 	value := "uwu"
-	err = api.set(key, value)
+	err = api.Set(key, value)
 	if err != nil {
 		t.Fatal("Cannot set value: ", err)
 	}
 
-	err = api.del(key)
+	err = api.Del(key)
 	if err != nil {
 		t.Fatal("Cannot delete value: ", err)
 	}
 
-	val, err := api.get(key)
+	val, err := api.Get(key)
 	if err != nil {
 		t.Fatal("Cannot get value: ", err)
 	}

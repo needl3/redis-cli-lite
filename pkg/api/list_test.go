@@ -20,7 +20,7 @@ func TestLPush(t *testing.T) {
 
 	key := "arr"
 	val := "1"
-	_, err = api.lpush(key, val)
+	_, err = api.Lpush(key, val)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,12 +39,12 @@ func TestLPop(t *testing.T) {
 
 	key := "arr"
 	val := "1011"
-	_, err = api.lpush(key, val)
+	_, err = api.Lpush(key, val)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	resp, err := api.lpop(key)
+	resp, err := api.Lpop(key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,13 +70,13 @@ func TestLRange(t *testing.T) {
 	end := 2
 	vals := []string{"sdfdf", "afewl", "fj890"}
 	for _, val := range vals {
-		_, err = api.lpush(key, val)
+		_, err = api.Lpush(key, val)
 		if err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	resp, err := api.lrange(key, start, end)
+	resp, err := api.Lrange(key, start, end)
 	if err != nil {
 		t.Fatal(err)
 	}
