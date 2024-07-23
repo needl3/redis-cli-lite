@@ -3,11 +3,36 @@
 
 ## Redis client written in go
 
-### Modes of usage
-1. Use as cli tool
-2. Use it with your golang project
+## Modes of usage
 
+### As cli tool
+```bash
+redis-cli-lite localhost 6379
+```
 
+### As golang library in your project
+```bash
+package main
+
+import (
+	"fmt"
+
+	"github.com/needl3/redis-cli-lite/pkg/api"
+)
+
+func main() {
+	api, err := api.Initialize("localhost", 6379, 10, nil)
+	if err != nil {
+		panic(err)
+	}
+	resp, err := api.Ping()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Got: ", resp)
+}
+```
 
 You can use this on cli but that has limitations. For example, there is not really a way to tell if the value is string, number or array from cli. So, everything is stored as string. We could implement something intelligent but this is unnecessarily complex and unusable and not even official cli tool does it afaik.
 
